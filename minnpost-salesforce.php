@@ -58,11 +58,11 @@ class Minnpost_Salesforce {
 	* @throws \Exception
 	*/
     private function init() {
-    	add_filter( 'salesforce_rest_api_find_sf_object_match', array( $this, 'find_sf_object_match' ), 10, 4 );
-    	add_filter( 'salesforce_rest_api_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
-    	add_filter( 'salesforce_rest_api_settings_tabs', array( $this, 'minnpost_tabs'), 10, 1 );
-        add_action( 'salesforce_rest_api_push_success', array( $this, 'push_member_level' ), 10, 4 );
-        add_action( 'salesforce_rest_api_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
+    	add_filter( 'object_sync_for_salesforce_find_sf_object_match', array( $this, 'find_sf_object_match' ), 10, 4 );
+    	add_filter( 'object_sync_for_salesforce_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
+    	add_filter( 'object_sync_for_salesforce_settings_tabs', array( $this, 'minnpost_tabs'), 10, 1 );
+        add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 4 );
+        add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
         
     }
 
