@@ -196,7 +196,7 @@ class Minnpost_Salesforce {
 
 				// we want to see if the user's email address exists as a primary on any contact and use that contact if so
 				$mail = $wordpress_object['user_email'];
-				$query = "SELECT Primary_Contact__c FROM Email__c WHERE Email_Address__c = '$mail'";
+				$query = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%";
 				$result = $salesforce_api->query( $query );
 
 				if ( 1 === $result['data']['totalSize'] ) {
