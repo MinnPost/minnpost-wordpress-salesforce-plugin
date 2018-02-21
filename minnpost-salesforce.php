@@ -168,16 +168,16 @@ class Minnpost_Salesforce {
 	* This is designed to find out if there is already a map based on the available WordPress data
 	*
 	* @param string $salesforce_id
-	*	Unique identifier for the Salesforce object
+	*   Unique identifier for the Salesforce object
 	* @param array $wordpress_object
-	*	Array of the wordpress object's data
+	*   Array of the WordPress object's data
 	* @param array $mapping
 	*   Array of the fieldmap between the WordPress and Salesforce object types
 	* @param string $action
 	*   Is this a push or pull action?
 	*
 	* @return array $salesforce_id
-	*	Unique identifier for the Salesforce object
+	*   Unique identifier for the Salesforce object
 	*
 	* todo: may need a way for this to prevent a deletion in Salesforce if multiple contacts match the email address, for example. the plugin itself will block it if there are existing map rows. we might need to expand it for this, or maybe it is sufficient as it is. mp would probably turn off the delete hooks anyway.
 	*
@@ -291,7 +291,7 @@ class Minnpost_Salesforce {
 				$level_from_salesforce = $salesforce_member_level;
 			}
 
-			$wp_roles = new WP_Roles(); // get all the available roles in wordpress
+			$wp_roles = new WP_Roles(); // get all the available roles in WordPress
 			$wp_roles = $wp_roles->get_names(); // just get the names
 
 			$this_user_roles = $user->roles; // this is roles for this user
