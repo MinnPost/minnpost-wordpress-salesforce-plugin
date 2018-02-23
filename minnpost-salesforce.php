@@ -63,6 +63,7 @@ class Minnpost_Salesforce {
 		add_filter( 'object_sync_for_salesforce_settings_tabs', array( $this, 'minnpost_tabs' ), 10, 1 );
 		add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 4 );
 		add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
+		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
 	}
 
 	/**
@@ -265,6 +266,29 @@ class Minnpost_Salesforce {
 			$this->set_member_level( $object_id, $wordpress_id, $params['member_level']['value'] );
 		}
 
+	}
+
+	public function login_fail_check( $message, $error_code, $data ) {
+		if ( 'invalid_username' === $error_code || 'invalid_email' === $error_code || 'invalidcombo' === $error_code ) {
+			if ( is_object( $this->salesforce ) ) {
+				$salesforce_api = $this->salesforce->salesforce['sfapi'];
+			} else {
+				$salesforce = $this->salesforce();
+				$salesforce_api = $salesforce->salesforce['sfapi'];
+			}
+			if ( is_object( $salesforce_api ) ) {
+				$mail = $data['user_email'];
+				if ( isset( $mail ) ) {
+					$query = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
+					$result = $salesforce_api->query( $query );
+					if ( 1 === $result['data']['totalSize'] ) {
+						$salesforce_id = $result['data']['records'][0]['Id'];
+						$message = 'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="' . site_url( '/user/register/' ) . '?user_email=' . rawurlencode( $mail ) . '">create an account</a> to access member benefits and settings.';
+					}
+				}
+			}
+		}
+		return $message;
 	}
 
 	/**
