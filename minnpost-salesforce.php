@@ -62,6 +62,7 @@ class Minnpost_Salesforce {
 		add_filter( 'object_sync_for_salesforce_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
 		add_filter( 'object_sync_for_salesforce_settings_tabs', array( $this, 'minnpost_tabs' ), 10, 1 );
 		add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 4 );
+		add_filter( 'object_sync_for_salesforce_push_update_params_modify', array( $this, 'set_names_if_missing' ), 10, 4 );
 		add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
 	}
@@ -235,6 +236,28 @@ class Minnpost_Salesforce {
 			$salesforce_member_level = $sf_response['data']['Membership_Level__c'];
 			$this->set_member_level( $object_id, $wordpress_id, $salesforce_member_level );
 		}
+
+	}
+
+	/**
+	* Set contact name fields if this is a new Contact being added to Salesforce
+	* This runs before the user has been pushed to Salesforce, but we have data for it, which may have a Salesforce ID
+	* @param array $params
+	*   Params mapping the fields to their values
+	* @param string $salesforce_id
+	*   Salesforce ID if there is a matched object
+	* @param array $mapping
+	*   Mapping object.
+	* @param array $object
+	*   WordPress object data.
+	*
+	*/
+	public function set_names_if_missing( $params, $salesforce_id, $mapping, $object ) {
+		if ( null === $salesforce_id ) {
+			$params['FirstName'] = $object['first_name'];
+			$params['LastName']  = $object['last_name'];
+		}
+		return $params;
 
 	}
 
