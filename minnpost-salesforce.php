@@ -81,7 +81,7 @@ class Minnpost_Salesforce {
 		}
 		if ( is_plugin_active( 'object-sync-for-salesforce/object-sync-for-salesforce.php' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . '../object-sync-for-salesforce/object-sync-for-salesforce.php';
-			$salesforce = Object_Sync_Salesforce::get_instance();
+			$salesforce       = Object_Sync_Salesforce::get_instance();
 			$this->salesforce = $salesforce;
 			return $this->salesforce;
 		}
@@ -94,16 +94,16 @@ class Minnpost_Salesforce {
 	*/
 	public function minnpost_salesforce_settings_forms() {
 		$get_data = filter_input_array( INPUT_GET, FILTER_SANITIZE_STRING );
-		$page = isset( $get_data['tab'] ) ? sanitize_key( $get_data['tab'] ) : 'settings';
-		$section = isset( $get_data['tab'] ) ? sanitize_key( $get_data['tab'] ) : 'settings';
+		$page     = isset( $get_data['tab'] ) ? sanitize_key( $get_data['tab'] ) : 'settings';
+		$section  = isset( $get_data['tab'] ) ? sanitize_key( $get_data['tab'] ) : 'settings';
 
-		$input_callback_default = array( $this, 'display_input_field' );
+		$input_callback_default   = array( $this, 'display_input_field' );
 		$input_checkboxes_default = array( $this, 'display_checkboxes' );
 		$this->fields_minnpost_settings(
 			'minnpost',
 			'minnpost',
 			array(
-				'text' => $input_callback_default,
+				'text'       => $input_callback_default,
 				'checkboxes' => $input_checkboxes_default,
 			)
 		);
@@ -122,31 +122,31 @@ class Minnpost_Salesforce {
 		// todo: figure out how to pick what objects to prematch against and put that here in the admin settings
 		$minnpost_salesforce_settings = array(
 			'nonmember_level_name' => array(
-				'title' => 'Name of Non-Member Level',
+				'title'    => 'Name of Non-Member Level',
 				'callback' => $callbacks['text'],
-				'page' => $page,
-				'section' => $section,
-				'args' => array(
-					'type' => 'text',
-					'desc' => '',
+				'page'     => $page,
+				'section'  => $section,
+				'args'     => array(
+					'type'     => 'text',
+					'desc'     => '',
 					'constant' => '',
 				),
 			),
 		);
 		foreach ( $minnpost_salesforce_settings as $key => $attributes ) {
-			$id = 'salesforce_api_' . $key;
-			$name = 'salesforce_api_' . $key;
-			$title = $attributes['title'];
+			$id       = 'salesforce_api_' . $key;
+			$name     = 'salesforce_api_' . $key;
+			$title    = $attributes['title'];
 			$callback = $attributes['callback'];
-			$page = $attributes['page'];
-			$section = $attributes['section'];
-			$args = array_merge(
+			$page     = $attributes['page'];
+			$section  = $attributes['section'];
+			$args     = array_merge(
 				$attributes['args'],
 				array(
-					'title' => $title,
-					'id' => $id,
+					'title'     => $title,
+					'id'        => $id,
 					'label_for' => $id,
-					'name' => $name,
+					'name'      => $name,
 				)
 			);
 			add_settings_field( $id, $title, $callback, $page, $section, $args );
@@ -190,15 +190,15 @@ class Minnpost_Salesforce {
 			if ( is_object( $this->salesforce ) ) {
 				$salesforce_api = $this->salesforce->salesforce['sfapi'];
 			} else {
-				$salesforce = $this->salesforce();
+				$salesforce     = $this->salesforce();
 				$salesforce_api = $salesforce->salesforce['sfapi'];
 			}
 
 			if ( is_object( $salesforce_api ) ) {
 
 				// we want to see if the user's email address exists as a primary on any contact and use that contact if so
-				$mail = $wordpress_object['user_email'];
-				$query = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
+				$mail   = $wordpress_object['user_email'];
+				$query  = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
 				$result = $salesforce_api->query( $query );
 
 				if ( 1 === $result['data']['totalSize'] ) {
@@ -232,7 +232,7 @@ class Minnpost_Salesforce {
 
 		// we run it on the push_success hook because that gives us the salesforce data we need
 		if ( isset( $synced_object['wordpress_object'][ $object_id ] ) && isset( $sf_response['data']['Membership_Level__c'] ) ) {
-			$wordpress_id = $synced_object['wordpress_object'][ $object_id ];
+			$wordpress_id            = $synced_object['wordpress_object'][ $object_id ];
 			$salesforce_member_level = $sf_response['data']['Membership_Level__c'];
 			$this->set_member_level( $object_id, $wordpress_id, $salesforce_member_level );
 		}
@@ -296,17 +296,17 @@ class Minnpost_Salesforce {
 			if ( is_object( $this->salesforce ) ) {
 				$salesforce_api = $this->salesforce->salesforce['sfapi'];
 			} else {
-				$salesforce = $this->salesforce();
+				$salesforce     = $this->salesforce();
 				$salesforce_api = $salesforce->salesforce['sfapi'];
 			}
 			if ( is_object( $salesforce_api ) ) {
 				$mail = $data['user_email'];
 				if ( isset( $mail ) ) {
-					$query = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
+					$query  = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
 					$result = $salesforce_api->query( $query );
 					if ( 1 === $result['data']['totalSize'] ) {
 						$salesforce_id = $result['data']['records'][0]['Id'];
-						$message = 'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="' . site_url( '/user/register/' ) . '?user_email=' . rawurlencode( $mail ) . '">create an account</a> to access member benefits and settings.';
+						$message       = 'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="' . site_url( '/user/register/' ) . '?user_email=' . rawurlencode( $mail ) . '">create an account</a> to access member benefits and settings.';
 					}
 				}
 			}
@@ -381,9 +381,9 @@ class Minnpost_Salesforce {
 	*
 	*/
 	public function add_roles_capabilities() {
-		$bronze = add_role( 'member_bronze', 'Member - Bronze', array() );
-		$silver = add_role( 'member_silver', 'Member - Silver', array() );
-		$gold = add_role( 'member_gold', 'Member - Gold', array() );
+		$bronze   = add_role( 'member_bronze', 'Member - Bronze', array() );
+		$silver   = add_role( 'member_silver', 'Member - Silver', array() );
+		$gold     = add_role( 'member_gold', 'Member - Gold', array() );
 		$platinum = add_role( 'member_platinum', 'Member - Platinum', array() );
 	}
 
@@ -405,10 +405,10 @@ class Minnpost_Salesforce {
 	* @param array $args
 	*/
 	public function display_input_field( $args ) {
-		$type   = $args['type'];
-		$id     = $args['label_for'];
-		$name   = $args['name'];
-		$desc   = $args['desc'];
+		$type    = $args['type'];
+		$id      = $args['label_for'];
+		$name    = $args['name'];
+		$desc    = $args['desc'];
 		$checked = '';
 
 		$class = 'regular-text';
@@ -418,7 +418,7 @@ class Minnpost_Salesforce {
 		}
 
 		if ( ! isset( $args['constant'] ) || ! defined( $args['constant'] ) ) {
-			$value  = esc_attr( get_option( $id, '' ) );
+			$value = esc_attr( get_option( $id, '' ) );
 			if ( 'checkbox' === $type ) {
 				if ( '1' === $value ) {
 					$checked = 'checked ';
@@ -456,13 +456,13 @@ class Minnpost_Salesforce {
 	* @param array $args
 	*/
 	public function display_checkboxes( $args ) {
-		$type = 'checkbox';
-		$name = $args['name'];
+		$type    = 'checkbox';
+		$name    = $args['name'];
 		$options = get_option( $name, array() );
 		foreach ( $args['items'] as $key => $value ) {
-			$text = $value['text'];
-			$id = $value['id'];
-			$desc = $value['desc'];
+			$text    = $value['text'];
+			$id      = $value['id'];
+			$desc    = $value['desc'];
 			$checked = '';
 			if ( is_array( $options ) && in_array( $key, $options, true ) ) {
 				$checked = 'checked';
