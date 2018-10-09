@@ -322,7 +322,7 @@ class Minnpost_Salesforce {
 	*   How to identify the ID field for the WordPress object
 	* @param int $wordpress_id
 	*   ID for the WordPress object
-	* @param array $salesforce_member_level
+	* @param string $salesforce_member_level
 	*   The member level value from Salesforce
 	*
 	*/
@@ -371,6 +371,13 @@ class Minnpost_Salesforce {
 			// if the salesforce level is a role, add it to the user
 			if ( array_key_exists( $level_from_salesforce, $wp_roles ) ) {
 				$user->add_role( $level_from_salesforce );
+			}
+
+			// add the value from the Salesforce API to the user's meta for member level
+			if ( $salesforce_member_level !== $nonmember_level_name ) {
+				update_user_meta( $user->ID, 'member_level', $salesforce_member_level );
+			} else {
+				update_user_meta( $user->ID, 'member_level', $nonmember_level_name );
 			}
 		} // End if().
 	}
