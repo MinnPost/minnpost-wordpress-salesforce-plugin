@@ -161,8 +161,9 @@ class Minnpost_Salesforce {
 
 	public function push_not_allowed( $push_allowed, $object_type, $object, $sf_sync_trigger, $mapping ) {
 		if ( 'user' === $object_type && 1 === $object['ID'] ) { // do not add user 1 to salesforce
-			return false;
+			$push_allowed = false;
 		}
+		return $push_allowed;
 	}
 
 	/**
