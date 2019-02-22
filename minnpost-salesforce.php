@@ -3,7 +3,7 @@
 Plugin Name: MinnPost Salesforce
 Plugin URI:
 Description:
-Version: 0.0.2
+Version: 0.0.3
 Author: Jonathan Stegall
 Author URI: https://code.minnpost.com
 License: GPL2+
@@ -30,7 +30,7 @@ class Minnpost_Salesforce {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->version = '0.0.2';
+		$this->version = '0.0.3';
 		$this->admin_init();
 		$this->init();
 		register_activation_hook( __FILE__, array( $this, 'add_user_fields' ) );
@@ -353,7 +353,6 @@ class Minnpost_Salesforce {
 			if ( '' !== $active_field_name && '' !== $active_field_value ) {
 				$query .= " AND $active_field_name = '$active_field_value'";
 			}
-			error_log( 'query is ' . $query );
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
 			if ( 0 <= $result['data']['totalSize'] ) {
