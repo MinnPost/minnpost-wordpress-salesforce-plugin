@@ -292,6 +292,15 @@ class Minnpost_Salesforce {
 
 	}
 
+	/**
+	* If a user fails to log in, check to see if they exist in Salesforce
+	*
+	* @param string $message
+	* @param string $error_code
+	* @param array $data
+	* @return string $message
+	*
+	*/
 	public function login_fail_check( $message, $error_code, $data ) {
 		if ( 'invalid_username' === $error_code || 'invalid_email' === $error_code || 'invalidcombo' === $error_code ) {
 			if ( is_object( $this->salesforce ) ) {
