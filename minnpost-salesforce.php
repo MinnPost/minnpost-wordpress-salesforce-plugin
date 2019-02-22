@@ -65,6 +65,8 @@ class Minnpost_Salesforce {
 		add_filter( 'object_sync_for_salesforce_push_update_params_modify', array( $this, 'set_names_if_missing' ), 10, 4 );
 		add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
+
+		add_filter( 'minnpost_membership_get_active_recurring_donations', array( $this, 'get_active_recurring_donations' ), 10, 3 );
 	}
 
 	/**
@@ -322,6 +324,52 @@ class Minnpost_Salesforce {
 			}
 		}
 		return $message;
+	}
+
+	/**
+	* Get the user's active recurring donations
+	*
+	* @param int $user_id
+	* @param string $active_field_name
+	* @param string $active_field_value
+	* @return array $donations
+	*
+	*/
+	public function get_active_recurring_donations( $user_id, $active_field_name, $active_field_value ) {
+		$donations  = array();
+
+		if ( is_object( $this->salesforce ) ) {
+			$salesforce = $this->salesforce;
+		} else {
+			$salesforce = $this->salesforce();
+		}
+
+		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		
+		if ( ! empty( $mapping ) ) {
+			$salesforce_id  = $mapping['salesforce_id'];
+			$salesforce_api = $salesforce->salesforce['sfapi'];
+			$query          = "SELECT Id, npe03__Amount__c, npe03__Installment_Period__c, npe03__Next_Payment_Date__c FROM npe03__Recurring_Donation__c WHERE npe03__Contact__c = '$salesforce_id'";
+			if ( '' !== $active_field_name && '' !== $active_field_value ) {
+				$query .= " AND $active_field_name = '$active_field_value'";
+			}
+			error_log( 'query is ' . $query );
+			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
+			
+			if ( 0 <= $result['data']['totalSize'] ) {
+				$records = $result['data']['records'];
+				foreach ( $records as $record ) {
+					$donations[] = array(
+						'id'        => $record['Id'],
+						'amount'    => $record['npe03__Amount__c'],
+						'frequency' => $record['npe03__Installment_Period__c'],
+						'next_date' => $record['npe03__Next_Payment_Date__c'],
+					);
+				}
+			}
+		}
+
+		return $donations;
 	}
 
 	/**
