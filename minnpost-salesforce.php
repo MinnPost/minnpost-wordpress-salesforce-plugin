@@ -66,7 +66,7 @@ class Minnpost_Salesforce {
 		add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
 
-		add_filter( 'minnpost_membership_get_active_recurring_donations', array( $this, 'get_active_recurring_donations' ), 10, 3 );
+		add_filter( 'minnpost_membership_get_active_recurring_donations', array( $this, 'get_active_recurring_donations' ), 10, 5 );
 	}
 
 	/**
@@ -348,10 +348,12 @@ class Minnpost_Salesforce {
 	* @param int $user_id
 	* @param string $active_field_name
 	* @param string $active_field_value
+	* @param string $payment_type_field_name
+	* @param string $payment_type_field_value
 	* @return array $donations
 	*
 	*/
-	public function get_active_recurring_donations( $user_id, $active_field_name, $active_field_value ) {
+	public function get_active_recurring_donations( $user_id, $active_field_name, $active_field_value, $payment_type_field_name, $payment_type_field_value ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -368,6 +370,9 @@ class Minnpost_Salesforce {
 			$query          = "SELECT Id, npe03__Amount__c, npe03__Installment_Period__c, npe03__Next_Payment_Date__c FROM npe03__Recurring_Donation__c WHERE npe03__Contact__c = '$salesforce_id'";
 			if ( '' !== $active_field_name && '' !== $active_field_value ) {
 				$query .= " AND $active_field_name = '$active_field_value'";
+			}
+			if ( '' !== $payment_type_field_name && '' !== $payment_type_field_value ) {
+				$query .= " AND $payment_type_field_name = '$payment_type_field_value'";
 			}
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
