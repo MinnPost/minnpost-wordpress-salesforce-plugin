@@ -156,11 +156,27 @@ class Minnpost_Salesforce {
 		}
 	}
 
-	function minnpost_tabs( $tabs ) {
+	/**
+	* Add an admin tab to the Salesforce plugin's settings
+	*
+	* @param array $tabs
+	* @return array $tabs
+	*/
+	public function minnpost_tabs( $tabs ) {
 		$tabs['minnpost'] = 'MinnPost';
 		return $tabs;
 	}
 
+	/**
+	* Do not add user with ID of 1 to Salesforce
+	*
+	* @param bool $push_allowed
+	* @param string $object_type
+	* @param array $object
+	* @param int $sf_sync_trigger
+	* @param array $mapping
+	* @return bool $push_allowed
+	*/
 	public function push_not_allowed( $push_allowed, $object_type, $object, $sf_sync_trigger, $mapping ) {
 		if ( 'user' === $object_type && 1 === $object['ID'] ) { // do not add user 1 to salesforce
 			$push_allowed = false;
