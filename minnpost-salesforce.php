@@ -67,6 +67,7 @@ class Minnpost_Salesforce {
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
 
 		add_filter( 'minnpost_membership_get_active_recurring_donations', array( $this, 'get_active_recurring_donations' ), 10, 5 );
+		add_filter( 'minnpost_membership_get_pledged_opportunities', array( $this, 'get_pledged_opportunities' ), 10, 6 );
 	}
 
 	/**
@@ -384,6 +385,56 @@ class Minnpost_Salesforce {
 						'amount'    => $record['npe03__Amount__c'],
 						'frequency' => $record['npe03__Installment_Period__c'],
 						'next_date' => $record['npe03__Next_Payment_Date__c'],
+					);
+				}
+			}
+		}
+
+		return $donations;
+	}
+
+	/**
+	* Get the user's pledged opportunities
+	*
+	* @param int $user_id
+	* @param string $recurrence_field
+	* @param string $recurrence_value
+	* @param string $contact_id_field
+	* @param string $payment_type_field_name
+	* @param string $payment_type_field_value
+	* @return array $donations
+	*
+	*/
+	public function get_pledged_opportunities( $user_id, $recurrence_field, $recurrence_value, $contact_id_field, $payment_type_field_name, $payment_type_field_value ) {
+		$donations  = array();
+
+		if ( is_object( $this->salesforce ) ) {
+			$salesforce = $this->salesforce;
+		} else {
+			$salesforce = $this->salesforce();
+		}
+
+		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		
+		if ( ! empty( $mapping ) ) {
+			$salesforce_id  = $mapping['salesforce_id'];
+			$salesforce_api = $salesforce->salesforce['sfapi'];
+			$query          = "SELECT Id, Amount, CloseDate FROM Opportunity WHERE StageName = 'Pledged' AND $contact_id_field = '$salesforce_id'";
+			if ( '' !== $recurrence_field && '' !== $recurrence_value ) {
+				$query .= " AND $recurrence_field = '$recurrence_value'";
+			}
+			if ( '' !== $payment_type_field_name && '' !== $payment_type_field_value ) {
+				$query .= " AND $payment_type_field_name = '$payment_type_field_value'";
+			}
+			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
+			
+			if ( 0 <= $result['data']['totalSize'] ) {
+				$records = $result['data']['records'];
+				foreach ( $records as $record ) {
+					$donations[] = array(
+						'id'        => $record['Id'],
+						'amount'    => $record['Amount'],
+						'next_date' => $record['CloseDate'],
 					);
 				}
 			}
