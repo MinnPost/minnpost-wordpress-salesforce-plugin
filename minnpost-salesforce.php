@@ -221,9 +221,9 @@ class Minnpost_Salesforce {
 				$query  = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
 				$result = $salesforce_api->query( $query );
 
-				if ( 1 === $result['data']['totalSize'] ) {
+				if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
 					$salesforce_id = $result['data']['records'][0]['Id'];
-				} elseif ( $result['data']['totalSize'] > 1 ) {
+				} elseif ( isset( $result['data']['totalSize'] ) && $result['data']['totalSize'] > 1 ) {
 					error_log( 'Salesforce has ' . $result['data']['totalSize'] . ' matches for this email. Try to log all of them: ' . print_r( $result['data']['records'], true ) );
 				}
 			}
@@ -333,7 +333,7 @@ class Minnpost_Salesforce {
 				if ( isset( $mail ) ) {
 					$query  = "SELECT Id FROM Contact WHERE Consolidated_EMail__c LIKE '%$mail%'";
 					$result = $salesforce_api->query( $query );
-					if ( 1 === $result['data']['totalSize'] ) {
+					if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
 						$salesforce_id = $result['data']['records'][0]['Id'];
 						$message       = 'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="' . site_url( '/user/register/' ) . '?user_email=' . rawurlencode( $mail ) . '">create an account</a> to access member benefits and settings.';
 					}
@@ -377,7 +377,7 @@ class Minnpost_Salesforce {
 			}
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
-			if ( 0 <= $result['data']['totalSize'] ) {
+			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
 					$donations[] = array(
@@ -428,7 +428,7 @@ class Minnpost_Salesforce {
 			}
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
-			if ( 0 <= $result['data']['totalSize'] ) {
+			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
 					$donations[] = array(
