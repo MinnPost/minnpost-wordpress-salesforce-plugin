@@ -68,7 +68,8 @@ class Minnpost_Salesforce {
 
 		add_filter( 'minnpost_membership_get_active_recurring_donations', array( $this, 'get_active_recurring_donations' ), 10, 5 );
 		add_filter( 'minnpost_membership_get_pledged_opportunities', array( $this, 'get_pledged_opportunities' ), 10, 6 );
-		add_filter( 'minnpost_membership_get_previous_opportunities', array( $this, 'get_previous_opportunities' ), 10, 6 );
+
+		add_filter( 'minnpost_membership_get_failed_opportunities', array( $this, 'get_failed_opportunities' ), 10, 9 );
 	}
 
 	/**
@@ -445,18 +446,21 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Get the user's previous opportunities
+	* Get the user's failed opportunities based on the passed criteria
 	*
 	* @param int $user_id
-	* @param string $recurrence_field
-	* @param string $recurrence_value
-	* @param string $contact_id_field
-	* @param string $payment_type_field_name
-	* @param string $payment_type_field_value
+	* @param string $history_opp_contact_field
+	* @param string $failed_payment_type_field
+	* @param string $failed_payment_type_value
+	* @param string $history_failed_value
+	* @param string|int $history_days_for_failed
+	* @param string $failed_onetime_field
+	* @param string $failed_onetime_value
+	* @param string $failed_recurring_id_field
 	* @return array $donations
 	*
 	*/
-	public function get_previous_opportunities( $user_id, $recurrence_field, $recurrence_value, $contact_id_field, $payment_type_field_name, $payment_type_field_value ) {
+	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $failed_payment_type_field, $failed_payment_type_value, $history_failed_value, $history_days_for_failed, $failed_onetime_field, $failed_onetime_value, $failed_recurring_id_field ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -470,22 +474,38 @@ class Minnpost_Salesforce {
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
-			$query          = "SELECT Id, Amount, CloseDate FROM Opportunity WHERE StageName = 'ClosedWon' OR StageName = 'Failed' AND $contact_id_field = '$salesforce_id'";
-			if ( '' !== $recurrence_field && '' !== $recurrence_value ) {
-				$query .= " AND $recurrence_field = '$recurrence_value'";
+			$query          = "SELECT Id, Amount, CloseDate, $failed_recurring_id_field FROM Opportunity WHERE StageName = '$history_failed_value' AND $history_opp_contact_field = '$salesforce_id'";
+			if ( '' !== $failed_payment_type_field && '' !== $failed_payment_type_value ) {
+				$query .= " AND $failed_payment_type_field = '$failed_payment_type_value'";
 			}
-			if ( '' !== $payment_type_field_name && '' !== $payment_type_field_value ) {
-				$query .= " AND $payment_type_field_name = '$payment_type_field_value'";
+			if ( '' !== $history_days_for_failed ) {
+				$thirty_days_ago = date( 'Y-m-d', strtotime( '-30 days' ) );
+    			$today           = current_time( 'Y-m-d' );
+				$query .= " AND ( CloseDate <= $today AND CloseDate >= $thirty_days_ago )";
 			}
+
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
+					if ( $failed_onetime_value !== $failed_onetime_field && '' !== $failed_recurring_id_field ) {
+						$id = $failed_recurring_id_field;
+					} else {
+						$id = $record['Id'];
+					}
 					$donations[] = array(
-						'id'        => $record['Id'],
-						'amount'    => $record['Amount'],
-						'next_date' => $record['CloseDate'],
+						'id'         => $id,
+						'amount'     => $record['Amount'],
+						'close_date' => $record['CloseDate'],
+					);
+				}
+			}
+		}
+
+		return $donations;
+	}
+
 					);
 				}
 			}
