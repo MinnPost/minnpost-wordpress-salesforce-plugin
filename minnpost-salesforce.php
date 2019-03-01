@@ -70,6 +70,7 @@ class Minnpost_Salesforce {
 		add_filter( 'minnpost_membership_get_pledged_opportunities', array( $this, 'get_pledged_opportunities' ), 10, 6 );
 
 		add_filter( 'minnpost_membership_get_failed_opportunities', array( $this, 'get_failed_opportunities' ), 10, 9 );
+		add_filter( 'minnpost_membership_get_successful_opportunities', array( $this, 'get_successful_opportunities' ), 10, 3 );
 	}
 
 	/**
@@ -506,6 +507,39 @@ class Minnpost_Salesforce {
 		return $donations;
 	}
 
+	/**
+	* Get the user's successful opportunities based on the passed criteria
+	*
+	* @param int $user_id
+	* @param string $history_opp_contact_field
+	* @param string $history_success_value
+	* @return array $donations
+	*
+	*/
+	public function get_successful_opportunities( $user_id, $history_opp_contact_field, $history_success_value ) {
+		$donations  = array();
+
+		if ( is_object( $this->salesforce ) ) {
+			$salesforce = $this->salesforce;
+		} else {
+			$salesforce = $this->salesforce();
+		}
+
+		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		
+		if ( ! empty( $mapping ) ) {
+			$salesforce_id  = $mapping['salesforce_id'];
+			$salesforce_api = $salesforce->salesforce['sfapi'];
+			$query          = "SELECT Id, Amount, CloseDate FROM Opportunity WHERE StageName = '$history_success_value' AND $history_opp_contact_field = '$salesforce_id'";
+			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
+			
+			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
+				$records = $result['data']['records'];
+				foreach ( $records as $record ) {
+					$donations[] = array(
+						'id'         => $record['Id'],
+						'amount'     => $record['Amount'],
+						'close_date' => $record['CloseDate'],
 					);
 				}
 			}
