@@ -455,13 +455,13 @@ class Minnpost_Salesforce {
 	* @param string $opp_payment_type_value
 	* @param string $history_failed_value
 	* @param string|int $history_days_for_failed
-	* @param string $failed_onetime_field
-	* @param string $failed_onetime_value
+	* @param string $recurrence_field_name
+	* @param string $recurrence_field_value
 	* @param string $failed_recurring_id_field
 	* @return array $donations
 	*
 	*/
-	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $failed_onetime_field, $failed_onetime_value, $failed_recurring_id_field ) {
+	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $recurrence_field_name, $recurrence_field_value, $failed_recurring_id_field ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -475,7 +475,7 @@ class Minnpost_Salesforce {
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
-			$query          = "SELECT Id, Amount, CloseDate, $failed_recurring_id_field FROM Opportunity WHERE StageName = '$history_failed_value' AND $history_opp_contact_field = '$salesforce_id'";
+			$query          = "SELECT Id, Amount, CloseDate, $failed_recurring_id_field, $recurrence_field_name FROM Opportunity WHERE StageName = '$history_failed_value' AND $history_opp_contact_field = '$salesforce_id'";
 			if ( '' !== $opp_payment_type_field && '' !== $opp_payment_type_value ) {
 				$query .= " AND $opp_payment_type_field = '$opp_payment_type_value'";
 			}
@@ -490,16 +490,20 @@ class Minnpost_Salesforce {
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
-					if ( $failed_onetime_value !== $failed_onetime_field && '' !== $failed_recurring_id_field ) {
-						$id = $failed_recurring_id_field;
+					if ( $record[ $recurrence_field_name ] !== $recurrence_field_value && '' !== $failed_recurring_id_field ) {
+						$id = $record[ $failed_recurring_id_field ];
 					} else {
 						$id = $record['Id'];
 					}
-					$donations[] = array(
+					$donation = array(
 						'id'         => $id,
 						'amount'     => $record['Amount'],
 						'close_date' => $record['CloseDate'],
 					);
+					if ( $record[ $recurrence_field_name ] !== $recurrence_field_value && '' !== $failed_recurring_id_field ) {
+						$donation['frequency'] = $record[ $recurrence_field_name ];
+					}
+					$donations[] = $donation;
 				}
 			}
 		}
