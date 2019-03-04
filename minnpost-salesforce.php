@@ -451,8 +451,8 @@ class Minnpost_Salesforce {
 	*
 	* @param int $user_id
 	* @param string $history_opp_contact_field
-	* @param string $failed_payment_type_field
-	* @param string $failed_payment_type_value
+	* @param string $opp_payment_type_field
+	* @param string $opp_payment_type_value
 	* @param string $history_failed_value
 	* @param string|int $history_days_for_failed
 	* @param string $failed_onetime_field
@@ -461,7 +461,7 @@ class Minnpost_Salesforce {
 	* @return array $donations
 	*
 	*/
-	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $failed_payment_type_field, $failed_payment_type_value, $history_failed_value, $history_days_for_failed, $failed_onetime_field, $failed_onetime_value, $failed_recurring_id_field ) {
+	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $failed_onetime_field, $failed_onetime_value, $failed_recurring_id_field ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -476,8 +476,8 @@ class Minnpost_Salesforce {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
 			$query          = "SELECT Id, Amount, CloseDate, $failed_recurring_id_field FROM Opportunity WHERE StageName = '$history_failed_value' AND $history_opp_contact_field = '$salesforce_id'";
-			if ( '' !== $failed_payment_type_field && '' !== $failed_payment_type_value ) {
-				$query .= " AND $failed_payment_type_field = '$failed_payment_type_value'";
+			if ( '' !== $opp_payment_type_field && '' !== $opp_payment_type_value ) {
+				$query .= " AND $opp_payment_type_field = '$opp_payment_type_value'";
 			}
 			if ( '' !== $history_days_for_failed ) {
 				$thirty_days_ago = date( 'Y-m-d', strtotime( '-30 days' ) );
