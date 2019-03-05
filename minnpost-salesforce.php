@@ -611,6 +611,13 @@ class Minnpost_Salesforce {
 				$user->add_role( $level_from_salesforce );
 			}
 
+			// if a user has no roles, give them the default WordPress role
+			// this is helpful for legacy accounts that could lapse in their membership and then be left with no user role, which could be problematic.
+			if ( empty( $this_user_roles ) ) {
+				$default_role = get_option( 'default_role' );
+				$user->add_role( $default_role );
+			}
+
 			// add the value from the Salesforce API to the user's meta for member level
 			if ( $salesforce_member_level !== $nonmember_level_name ) {
 				update_user_meta( $user->ID, 'member_level', $salesforce_member_level );
