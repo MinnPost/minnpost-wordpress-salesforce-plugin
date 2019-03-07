@@ -67,10 +67,11 @@ class Minnpost_Salesforce {
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
 
 		add_filter( 'minnpost_membership_get_active_recurring_donations', array( $this, 'get_active_recurring_donations' ), 10, 5 );
-		add_filter( 'minnpost_membership_get_pledged_opportunities', array( $this, 'get_pledged_opportunities' ), 10, 6 );
+		add_filter( 'minnpost_membership_get_pledged_opportunities', array( $this, 'get_pledged_opportunities' ), 10, 7 );
 
-		add_filter( 'minnpost_membership_get_failed_opportunities', array( $this, 'get_failed_opportunities' ), 10, 9 );
-		add_filter( 'minnpost_membership_get_successful_opportunities', array( $this, 'get_successful_opportunities' ), 10, 3 );
+		add_filter( 'minnpost_membership_get_failed_opportunities', array( $this, 'get_failed_opportunities' ), 10, 10 );
+		add_filter( 'minnpost_membership_get_successful_opportunities', array( $this, 'get_successful_opportunities' ), 10, 4 );
+
 		add_filter( 'minnpost_membership_get_member_level', array( $this, 'get_member_level' ), 10, 3 );
 	}
 
@@ -406,10 +407,11 @@ class Minnpost_Salesforce {
 	* @param string $contact_id_field
 	* @param string $payment_type_field_name
 	* @param string $payment_type_field_value
+	* @param string $opportunity_type_value
 	* @return array $donations
 	*
 	*/
-	public function get_pledged_opportunities( $user_id, $recurrence_field, $recurrence_value, $contact_id_field, $payment_type_field_name, $payment_type_field_value ) {
+	public function get_pledged_opportunities( $user_id, $recurrence_field, $recurrence_value, $contact_id_field, $payment_type_field_name, $payment_type_field_value, $opportunity_type_value = '' ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -429,6 +431,9 @@ class Minnpost_Salesforce {
 			}
 			if ( '' !== $payment_type_field_name && '' !== $payment_type_field_value ) {
 				$query .= " AND $payment_type_field_name = '$payment_type_field_value'";
+			}
+			if ( '' !== $opportunity_type_value ) {
+				$query .= " AND Type = '$opportunity_type_value'";
 			}
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
@@ -459,10 +464,11 @@ class Minnpost_Salesforce {
 	* @param string $recurrence_field_name
 	* @param string $recurrence_field_value
 	* @param string $failed_recurring_id_field
+	* @param string $opportunity_type_value
 	* @return array $donations
 	*
 	*/
-	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $recurrence_field_name, $recurrence_field_value, $failed_recurring_id_field ) {
+	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $recurrence_field_name, $recurrence_field_value, $failed_recurring_id_field, $opportunity_type_value = '' ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -484,6 +490,9 @@ class Minnpost_Salesforce {
 				$thirty_days_ago = date( 'Y-m-d', strtotime( '-30 days' ) );
     			$today           = current_time( 'Y-m-d' );
 				$query .= " AND ( CloseDate <= $today AND CloseDate >= $thirty_days_ago )";
+			}
+			if ( '' !== $opportunity_type_value ) {
+				$query .= " AND Type = '$opportunity_type_value'";
 			}
 
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
@@ -518,10 +527,11 @@ class Minnpost_Salesforce {
 	* @param int $user_id
 	* @param string $history_opp_contact_field
 	* @param string $history_success_value
+	* @param string $opportunity_type_value
 	* @return array $donations
 	*
 	*/
-	public function get_successful_opportunities( $user_id, $history_opp_contact_field, $history_success_value ) {
+	public function get_successful_opportunities( $user_id, $history_opp_contact_field, $history_success_value, $opportunity_type_value = '' ) {
 		$donations  = array();
 
 		if ( is_object( $this->salesforce ) ) {
@@ -536,6 +546,9 @@ class Minnpost_Salesforce {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
 			$query          = "SELECT Id, Amount, CloseDate FROM Opportunity WHERE StageName = '$history_success_value' AND $history_opp_contact_field = '$salesforce_id'";
+			if ( '' !== $opportunity_type_value ) {
+				$query .= " AND Type = '$opportunity_type_value'";
+			}
 			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
 			
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
