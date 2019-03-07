@@ -71,6 +71,7 @@ class Minnpost_Salesforce {
 
 		add_filter( 'minnpost_membership_get_failed_opportunities', array( $this, 'get_failed_opportunities' ), 10, 9 );
 		add_filter( 'minnpost_membership_get_successful_opportunities', array( $this, 'get_successful_opportunities' ), 10, 3 );
+		add_filter( 'minnpost_membership_get_member_level', array( $this, 'get_member_level' ), 10, 3 );
 	}
 
 	/**
@@ -550,6 +551,38 @@ class Minnpost_Salesforce {
 		}
 
 		return $donations;
+	}
+
+	/**
+	* Get the user's member level without cache
+	*
+	* @param int $user_id
+	* @return string $member_level
+	*
+	*/
+	public function get_member_level( $user_id ) {
+		$member_level = '';
+
+		if ( is_object( $this->salesforce ) ) {
+			$salesforce = $this->salesforce;
+		} else {
+			$salesforce = $this->salesforce();
+		}
+
+		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		
+		if ( ! empty( $mapping ) ) {
+			$salesforce_id  = $mapping['salesforce_id'];
+			$salesforce_api = $salesforce->salesforce['sfapi'];
+			$query          = "SELECT Id, Membership_Level__c FROM Contact WHERE Id = '$salesforce_id'";
+			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
+			
+			if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
+				$member_level = $result['data']['records'][0]['Membership_Level__c'];
+			}
+		}
+
+		return $member_level;
 	}
 
 	/**
