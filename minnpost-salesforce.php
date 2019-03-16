@@ -380,8 +380,13 @@ class Minnpost_Salesforce {
 			if ( '' !== $payment_type_field_name && '' !== $payment_type_field_value ) {
 				$query .= " AND $payment_type_field_name = '$payment_type_field_value'";
 			}
-			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
-			
+			$result = $salesforce_api->query(
+				$query,
+				array(
+					'cache'            => true,
+					'cache_expiration' => MINUTE_IN_SECONDS * 5,
+				)
+			);
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
@@ -435,8 +440,13 @@ class Minnpost_Salesforce {
 			if ( '' !== $opportunity_type_value ) {
 				$query .= " AND Type = '$opportunity_type_value'";
 			}
-			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
-			
+			$result = $salesforce_api->query(
+				$query,
+				array(
+					'cache'            => true,
+					'cache_expiration' => MINUTE_IN_SECONDS * 5,
+				)
+			);
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
@@ -495,8 +505,13 @@ class Minnpost_Salesforce {
 				$query .= " AND Type = '$opportunity_type_value'";
 			}
 
-			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
-			
+			$result = $salesforce_api->query(
+				$query,
+				array(
+					'cache'            => true,
+					'cache_expiration' => MINUTE_IN_SECONDS * 5,
+				)
+			);
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
@@ -549,8 +564,13 @@ class Minnpost_Salesforce {
 			if ( '' !== $opportunity_type_value ) {
 				$query .= " AND Type = '$opportunity_type_value'";
 			}
-			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
-			
+			$result = $salesforce_api->query(
+				$query,
+				array(
+					'cache'            => true,
+					'cache_expiration' => MINUTE_IN_SECONDS * 5,
+				)
+			);
 			if ( isset( $result['data']['totalSize'] ) && 0 <= $result['data']['totalSize'] ) {
 				$records = $result['data']['records'];
 				foreach ( $records as $record ) {
@@ -587,8 +607,13 @@ class Minnpost_Salesforce {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
 			$query          = "SELECT Id, Membership_Level__c FROM Contact WHERE Id = '$salesforce_id'";
-			$result = $salesforce_api->query( $query, array( 'cache' => false ) );
-			
+			$result         = $salesforce_api->query(
+				$query,
+				array(
+					'cache'            => true,
+					'cache_expiration' => MINUTE_IN_SECONDS * 5,
+				)
+			);
 			if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
 				$member_level = $result['data']['records'][0]['Membership_Level__c'];
 			}
