@@ -360,7 +360,8 @@ class Minnpost_Salesforce {
 	*
 	*/
 	public function get_active_recurring_donations( $user_id, $active_field_name, $active_field_value, $payment_type_field_name, $payment_type_field_value ) {
-		$donations  = array();
+
+		$donations = array();
 
 		if ( is_object( $this->salesforce ) ) {
 			$salesforce = $this->salesforce;
@@ -369,7 +370,6 @@ class Minnpost_Salesforce {
 		}
 
 		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
-		
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -412,7 +412,8 @@ class Minnpost_Salesforce {
 	*
 	*/
 	public function get_pledged_opportunities( $user_id, $recurrence_field, $recurrence_value, $contact_id_field, $payment_type_field_name, $payment_type_field_value, $opportunity_type_value = '' ) {
-		$donations  = array();
+
+		$donations = array();
 
 		if ( is_object( $this->salesforce ) ) {
 			$salesforce = $this->salesforce;
@@ -421,7 +422,6 @@ class Minnpost_Salesforce {
 		}
 
 		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
-		
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -469,7 +469,8 @@ class Minnpost_Salesforce {
 	*
 	*/
 	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $recurrence_field_name, $recurrence_field_value, $failed_recurring_id_field, $opportunity_type_value = '' ) {
-		$donations  = array();
+
+		$donations = array();
 
 		if ( is_object( $this->salesforce ) ) {
 			$salesforce = $this->salesforce;
@@ -478,7 +479,6 @@ class Minnpost_Salesforce {
 		}
 
 		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
-		
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -488,8 +488,8 @@ class Minnpost_Salesforce {
 			}
 			if ( '' !== $history_days_for_failed ) {
 				$thirty_days_ago = date( 'Y-m-d', strtotime( '-30 days' ) );
-    			$today           = current_time( 'Y-m-d' );
-				$query .= " AND ( CloseDate <= $today AND CloseDate >= $thirty_days_ago )";
+				$today           = current_time( 'Y-m-d' );
+				$query          .= " AND ( CloseDate <= $today AND CloseDate >= $thirty_days_ago )";
 			}
 			if ( '' !== $opportunity_type_value ) {
 				$query .= " AND Type = '$opportunity_type_value'";
@@ -532,7 +532,8 @@ class Minnpost_Salesforce {
 	*
 	*/
 	public function get_successful_opportunities( $user_id, $history_opp_contact_field, $history_success_value, $opportunity_type_value = '' ) {
-		$donations  = array();
+
+		$donations = array();
 
 		if ( is_object( $this->salesforce ) ) {
 			$salesforce = $this->salesforce;
@@ -541,7 +542,6 @@ class Minnpost_Salesforce {
 		}
 
 		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
-		
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -583,7 +583,6 @@ class Minnpost_Salesforce {
 		}
 
 		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
-		
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
