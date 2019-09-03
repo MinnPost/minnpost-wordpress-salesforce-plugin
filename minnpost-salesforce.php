@@ -753,7 +753,8 @@ class Minnpost_Salesforce {
 				$value = $args['default'];
 			}
 
-			echo sprintf( '<input type="%1$s" value="%2$s" name="%3$s" id="%4$s" class="%5$s"%6$s>',
+			echo sprintf(
+				'<input type="%1$s" value="%2$s" name="%3$s" id="%4$s" class="%5$s"%6$s>',
 				esc_attr( $type ),
 				esc_attr( $value ),
 				esc_attr( $name ),
@@ -762,12 +763,14 @@ class Minnpost_Salesforce {
 				esc_html( $checked )
 			);
 			if ( '' !== $desc ) {
-				echo sprintf( '<p class="description">%1$s</p>',
+				echo sprintf(
+					'<p class="description">%1$s</p>',
 					esc_html( $desc )
 				);
 			}
 		} else {
-			echo sprintf( '<p><code>%1$s</code></p>',
+			echo sprintf(
+				'<p><code>%1$s</code></p>',
 				esc_html__( 'Defined in wp-config.php', 'object-sync-for-salesforce' )
 			);
 		}
@@ -795,7 +798,8 @@ class Minnpost_Salesforce {
 					$checked = 'checked';
 				}
 			}
-			echo sprintf( '<div class="checkbox"><label><input type="%1$s" value="%2$s" name="%3$s[]" id="%4$s"%5$s>%6$s</label></div>',
+			echo sprintf(
+				'<div class="checkbox"><label><input type="%1$s" value="%2$s" name="%3$s[]" id="%4$s"%5$s>%6$s</label></div>',
 				esc_attr( $type ),
 				esc_attr( $key ),
 				esc_attr( $name ),
@@ -804,7 +808,8 @@ class Minnpost_Salesforce {
 				esc_html( $text )
 			);
 			if ( '' !== $desc ) {
-				echo sprintf( '<p class="description">%1$s</p>',
+				echo sprintf(
+					'<p class="description">%1$s</p>',
 					esc_html( $desc )
 				);
 			}
