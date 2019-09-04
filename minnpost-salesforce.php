@@ -667,19 +667,20 @@ class Minnpost_Salesforce {
 
 					// if the user's role didn't change, get out of this function
 					if ( false !== strpos( $value, 'member_' ) && $level_from_wordpress === $level_from_salesforce ) {
-						return;
+						continue;
 					}
 
 					// this user was a member but now they're not. remove the level and get out of this function.
 					if ( false !== strpos( $value, 'member_' ) && $level_from_salesforce === $nonmember_level_name ) {
 						// this user is no longer a member, so get rid of the level
 						$user->remove_role( $value );
-						return;
+						continue;
 					}
 
 					// if the user has a new member level, get rid of the old one
 					if ( false !== strpos( $value, 'member_' ) && $level_from_wordpress !== $level_from_salesforce ) {
 						$user->remove_role( $value );
+						continue;
 					}
 				}
 			}
