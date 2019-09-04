@@ -61,7 +61,7 @@ class Minnpost_Salesforce {
 		add_filter( 'object_sync_for_salesforce_find_sf_object_match', array( $this, 'find_sf_object_match' ), 10, 4 );
 		add_filter( 'object_sync_for_salesforce_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
 		add_filter( 'object_sync_for_salesforce_settings_tabs', array( $this, 'minnpost_tabs' ), 10, 1 );
-		add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 4 );
+		add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 5 );
 		add_filter( 'object_sync_for_salesforce_push_update_params_modify', array( $this, 'set_names_if_missing' ), 10, 5 );
 		add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
@@ -250,16 +250,17 @@ class Minnpost_Salesforce {
 	* @param array $synced_object
 	*   The WordPress object, object map, and field map together
 	* @param string $object_id
+	*   The Salesforce ID
+	* @param string $wordpress_id_field_name
 	*   How to identify the ID field for the WordPress object
 	*
 	*/
-	public function push_member_level( $op, $sf_response, $synced_object, $object_id ) {
-
+	public function push_member_level( $op, $sf_response, $synced_object, $object_id, $wordpress_id_field_name ) {
 		// we run it on the push_success hook because that gives us the salesforce data we need
-		if ( isset( $synced_object['wordpress_object'][ $object_id ] ) && isset( $sf_response['data']['Membership_Level__c'] ) ) {
-			$wordpress_id            = $synced_object['wordpress_object'][ $object_id ];
+		if ( isset( $synced_object['wordpress_object'][ $wordpress_id_field_name ] ) && isset( $sf_response['data']['Membership_Level__c'] ) ) {
+			$wordpress_id            = $synced_object['wordpress_object'][ $wordpress_id_field_name ];
 			$salesforce_member_level = $sf_response['data']['Membership_Level__c'];
-			$this->set_member_level( $object_id, $wordpress_id, $salesforce_member_level );
+			$this->set_member_level( $wordpress_id_field_name, $wordpress_id, $salesforce_member_level );
 		}
 
 	}
