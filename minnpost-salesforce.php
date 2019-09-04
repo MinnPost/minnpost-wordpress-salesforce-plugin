@@ -343,7 +343,12 @@ class Minnpost_Salesforce {
 					$result = $salesforce_api->query( $query );
 					if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
 						$salesforce_id = $result['data']['records'][0]['Id'];
-						$message       = 'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="' . site_url( '/user/register/' ) . '?user_email=' . rawurlencode( $mail ) . '">create an account</a> to access member benefits and settings.';
+						// translators: 1) is the register URL, 2) is the user's raw url encoded email address
+						$message = sprintf(
+							'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="%1$s?user_email=%2$s">create an account</a> to access member benefits and settings.',
+							site_url( '/user/register/' ),
+							rawurlencode( $mail )
+						);
 					}
 				}
 			}
