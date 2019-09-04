@@ -301,20 +301,20 @@ class Minnpost_Salesforce {
 	*   The fieldmap between the WordPress and Salesforce objects
 	* @param array $object
 	*   The Salesforce object
-	* @param string $object_id
+	* @param string $wordpress_id_field_name
 	*   How to identify the ID field for the WordPress object
 	* @param array $params
 	*   The params array that matches fields to each other for saving
 	*
 	*/
-	public function pull_member_level( $wordpress_id, $mapping, $object, $object_id, $params ) {
+	public function pull_member_level( $wordpress_id, $mapping, $object, $wordpress_id_field_name, $params ) {
 
 		// as per this question, if the only thing that changes is the member level formula that we reference, the updated api call does not get triggered
 		// https://salesforce.stackexchange.com/questions/42726/how-to-detect-changes-in-formula-field-value-via-api
 
 		// i think it should run on the pre pull hook because we don't let salesforce create users by itself
 		if ( null !== $wordpress_id && isset( $params['member_level']['value'] ) ) {
-			$this->set_member_level( $object_id, $wordpress_id, $params['member_level']['value'] );
+			$this->set_member_level( $wordpress_id_field_name, $wordpress_id, $params['member_level']['value'] );
 		}
 
 	}
@@ -629,7 +629,7 @@ class Minnpost_Salesforce {
 	* Do the actual setting of the member level.
 	* This works the same for push and pull, it just requires the correct data
 	*
-	* @param string $object_id
+	* @param string $wordpress_id_field_name
 	*   How to identify the ID field for the WordPress object
 	* @param int $wordpress_id
 	*   ID for the WordPress object
@@ -637,8 +637,8 @@ class Minnpost_Salesforce {
 	*   The member level value from Salesforce
 	*
 	*/
-	private function set_member_level( $object_id, $wordpress_id, $salesforce_member_level ) {
-		$user = get_user_by( $object_id, $wordpress_id );
+	private function set_member_level( $wordpress_id_field_name, $wordpress_id, $salesforce_member_level ) {
+		$user = get_user_by( $wordpress_id_field_name, $wordpress_id );
 		if ( false !== $user ) {
 
 			$nonmember_level_name = get_option( 'salesforce_api_nonmember_level_name', 'Non-member' );
