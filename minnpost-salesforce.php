@@ -130,7 +130,7 @@ class Minnpost_Salesforce {
 		// todo: figure out how to pick what objects to prematch against and put that here in the admin settings
 		$minnpost_salesforce_settings = array(
 			'nonmember_level_name' => array(
-				'title'    => 'Name of Non-Member Level',
+				'title'    => __( 'Name of Non-Member Level', 'minnpost-wordpress-salesforce' ),
 				'callback' => $callbacks['text'],
 				'page'     => $page,
 				'section'  => $section,
