@@ -106,6 +106,8 @@ class Minnpost_Salesforce {
 		$section  = isset( $get_data['tab'] ) ? sanitize_key( $get_data['tab'] ) : 'settings';
 
 		$input_callback_default   = array( $this, 'display_input_field' );
+		$textarea_default         = array( $this, 'display_textarea' );
+		$editor_default           = array( $this, 'display_editor' );
 		$input_checkboxes_default = array( $this, 'display_checkboxes' );
 		$this->fields_minnpost_settings(
 			'minnpost',
@@ -113,6 +115,8 @@ class Minnpost_Salesforce {
 			array(
 				'text'       => $input_callback_default,
 				'checkboxes' => $input_checkboxes_default,
+				'textarea'   => $textarea_default,
+				'editor'     => $editor_default,
 			)
 		);
 	}
@@ -778,7 +782,7 @@ class Minnpost_Salesforce {
 		} else {
 			echo sprintf(
 				'<p><code>%1$s</code></p>',
-				esc_html__( 'Defined in wp-config.php', 'object-sync-for-salesforce' )
+				esc_html__( 'Defined in wp-config.php', 'minnpost-wordpress-salesforce' )
 			);
 		}
 	}
@@ -822,6 +826,138 @@ class Minnpost_Salesforce {
 			}
 		}
 	}
+
+	/**
+	* Display for a dropdown/select
+	*
+	* @param array $args
+	*/
+	public function display_textarea( $args ) {
+		$id    = $args['label_for'];
+		$name  = $args['name'];
+		$desc  = $args['desc'];
+		$rows  = $args['rows'];
+		$cols  = $args['cols'];
+		$class = 'regular-text';
+		if ( ! isset( $args['constant'] ) || ! defined( $args['constant'] ) ) {
+			$value = esc_attr( get_option( $id, '' ) );
+			if ( '' === $value && isset( $args['default'] ) && '' !== $args['default'] ) {
+				$value = $args['default'];
+			}
+
+			if ( '' !== $rows ) {
+				$rows_attr = ' rows="' . esc_attr( $rows ) . '"';
+			} else {
+				$rows_attr = '';
+			}
+
+			if ( '' !== $cols ) {
+				$cols_attr = ' cols="' . esc_attr( $cols ) . '"';
+			} else {
+				$cols_attr = '';
+			}
+
+			echo sprintf(
+				'<textarea name="%1$s" id="%2$s" class="%3$s"%4$s%5$s>%6$s</textarea>',
+				esc_attr( $name ),
+				esc_attr( $id ),
+				sanitize_html_class( $class . esc_html( ' code' ) ),
+				$rows_attr,
+				$cols_attr,
+				esc_attr( $value )
+			);
+			if ( '' !== $desc ) {
+				echo sprintf(
+					'<p class="description">%1$s</p>',
+					esc_html( $desc )
+				);
+			}
+		} else {
+			echo sprintf(
+				'<p><code>%1$s</code></p>',
+				esc_html__( 'Defined in wp-config.php', 'minnpost-wordpress-salesforce' )
+			);
+		}
+	}
+
+	/**
+	* Display for a wysiwyg editir
+	*
+	* @param array $args
+	*/
+	public function display_editor( $args ) {
+		$id      = $args['label_for'];
+		$name    = $args['name'];
+		$desc    = $args['desc'];
+		$checked = '';
+
+		$class = 'regular-text';
+
+		if ( ! isset( $args['constant'] ) || ! defined( $args['constant'] ) ) {
+			$value = wp_kses_post( get_option( $id, '' ) );
+			if ( '' === $value && isset( $args['default'] ) && '' !== $args['default'] ) {
+				$value = $args['default'];
+			}
+
+			$settings = array();
+			if ( isset( $args['wpautop'] ) ) {
+				$settings['wpautop'] = $args['wpautop'];
+			}
+			if ( isset( $args['media_buttons'] ) ) {
+				$settings['media_buttons'] = $args['media_buttons'];
+			}
+			if ( isset( $args['default_editor'] ) ) {
+				$settings['default_editor'] = $args['default_editor'];
+			}
+			if ( isset( $args['drag_drop_upload'] ) ) {
+				$settings['drag_drop_upload'] = $args['drag_drop_upload'];
+			}
+			if ( isset( $args['name'] ) ) {
+				$settings['textarea_name'] = $args['name'];
+			}
+			if ( isset( $args['rows'] ) ) {
+				$settings['textarea_rows'] = $args['rows']; // default is 20
+			}
+			if ( isset( $args['tabindex'] ) ) {
+				$settings['tabindex'] = $args['tabindex'];
+			}
+			if ( isset( $args['tabfocus_elements'] ) ) {
+				$settings['tabfocus_elements'] = $args['tabfocus_elements'];
+			}
+			if ( isset( $args['editor_css'] ) ) {
+				$settings['editor_css'] = $args['editor_css'];
+			}
+			if ( isset( $args['editor_class'] ) ) {
+				$settings['editor_class'] = $args['editor_class'];
+			}
+			if ( isset( $args['teeny'] ) ) {
+				$settings['teeny'] = $args['teeny'];
+			}
+			if ( isset( $args['dfw'] ) ) {
+				$settings['dfw'] = $args['dfw'];
+			}
+			if ( isset( $args['tinymce'] ) ) {
+				$settings['tinymce'] = $args['tinymce'];
+			}
+			if ( isset( $args['quicktags'] ) ) {
+				$settings['quicktags'] = $args['quicktags'];
+			}
+
+			wp_editor( $value, $id, $settings );
+			if ( '' !== $desc ) {
+				echo sprintf(
+					'<p class="description">%1$s</p>',
+					esc_html( $desc )
+				);
+			}
+		} else {
+			echo sprintf(
+				'<p><code>%1$s</code></p>',
+				esc_html__( 'Defined in wp-config.php', 'minnpost-wordpress-salesforce' )
+			);
+		}
+	}
+
 }
 // Instantiate our class
 $minnpost_salesforce = new Minnpost_Salesforce();
