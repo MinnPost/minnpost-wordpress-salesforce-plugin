@@ -144,6 +144,20 @@ class Minnpost_Salesforce {
 					'constant' => '',
 				),
 			),
+			'no_account_message'   => array(
+				'title'    => __( 'No Account Message', 'minnpost-wordpress-salesforce' ),
+				'callback' => $callbacks['editor'],
+				'page'     => $page,
+				'section'  => $section,
+				'args'     => array(
+					// translators: 1) is the register URL
+					'desc'          => sprintf( __( 'This message will show to users who have Salesforce records but no website accounts if they try to log in. $register_url will show as %1$s and will prefill the email address the user is trying to use.', 'minnpost-wordpress-salesforce' ), site_url( '/user/register/' ) ),
+					'constant'      => '',
+					'type'          => 'text',
+					'rows'          => '5',
+					'media_buttons' => false,
+				),
+			),
 		);
 		foreach ( $minnpost_salesforce_settings as $key => $attributes ) {
 			$id       = 'salesforce_api_' . $key;
@@ -346,13 +360,11 @@ class Minnpost_Salesforce {
 					$query  = "SELECT Id FROM Contact WHERE Membership_level_number__c > 0 AND Consolidated_EMail__c LIKE '%$mail%'";
 					$result = $salesforce_api->query( $query );
 					if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
-						$salesforce_id = $result['data']['records'][0]['Id'];
-						// translators: 1) is the register URL, 2) is the user's raw url encoded email address
-						$message = sprintf(
-							'We couldn\'t find a website account with that email address, but we do have a MinnPost membership record for it. You can <a href="%1$s?user_email=%2$s">create an account</a> to access member benefits and settings.',
-							site_url( '/user/register/' ),
-							rawurlencode( $mail )
-						);
+						$salesforce_id      = $result['data']['records'][0]['Id'];
+						$no_account_message = get_option( 'salesforce_api_no_account_message', '' );
+						if ( '' !== $no_account_message ) {
+							$message = str_replace( '$register_url', site_url( '/user/register/' ) . '?user_email=' . rawurlencode( $mail ), $no_account_message );
+						}
 					}
 				}
 			}
