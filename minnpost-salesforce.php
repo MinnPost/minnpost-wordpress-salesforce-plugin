@@ -355,8 +355,8 @@ class Minnpost_Salesforce {
 				$salesforce_api = $salesforce->salesforce['sfapi'];
 			}
 			if ( is_object( $salesforce_api ) ) {
-				$mail = $data['user_email'];
-				if ( isset( $mail ) ) {
+				$mail = isset( $data['user_email'] ) ? $data['user_email'] : '';
+				if ( '' !== $mail ) {
 					$query  = "SELECT Id FROM Contact WHERE Membership_level_number__c > 0 AND Consolidated_EMail__c LIKE '%$mail%'";
 					$result = $salesforce_api->query( $query );
 					if ( isset( $result['data']['totalSize'] ) && 1 === $result['data']['totalSize'] ) {
