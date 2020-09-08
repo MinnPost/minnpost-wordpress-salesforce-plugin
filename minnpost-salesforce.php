@@ -3,7 +3,7 @@
 Plugin Name: MinnPost Salesforce
 Plugin URI:
 Description:
-Version: 0.0.6
+Version: 0.0.7
 Author: Jonathan Stegall
 Author URI: https://code.minnpost.com
 License: GPL2+
@@ -30,7 +30,7 @@ class Minnpost_Salesforce {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->version = '0.0.6';
+		$this->version = '0.0.7';
 		$this->admin_init();
 		$this->init();
 		register_activation_hook( __FILE__, array( $this, 'add_user_fields' ) );
@@ -62,7 +62,7 @@ class Minnpost_Salesforce {
 		add_filter( 'object_sync_for_salesforce_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
 		add_filter( 'object_sync_for_salesforce_settings_tabs', array( $this, 'minnpost_tabs' ), 10, 1 );
 		add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 5 );
-		add_filter( 'object_sync_for_salesforce_push_update_params_modify', array( $this, 'set_names_if_missing' ), 10, 5 );
+		add_filter( 'object_sync_for_salesforce_push_update_params_modify', array( $this, 'set_fields_if_missing' ), 10, 5 );
 		add_action( 'object_sync_for_salesforce_pre_pull', array( $this, 'pull_member_level' ), 10, 5 );
 		add_filter( 'user_account_management_custom_error_message', array( $this, 'login_fail_check' ), 10, 3 );
 
@@ -284,7 +284,7 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Set contact name fields if this is a new Contact being added to Salesforce
+	* Set contact fields if this is a new Contact being added to Salesforce
 	* This runs before the user has been pushed to Salesforce, but we have data for it, which may have a Salesforce ID
 	* @param array $params
 	*   Params mapping the fields to their values
@@ -298,10 +298,12 @@ class Minnpost_Salesforce {
 	*   WordPress object type
 	*
 	*/
-	public function set_names_if_missing( $params, $salesforce_id, $mapping, $object, $object_type = '' ) {
+	public function set_fields_if_missing( $params, $salesforce_id, $mapping, $object, $object_type = '' ) {
+		// this should only run if we're mapping a user that does not have a Salesforce id.
 		if ( 'user' === $object_type && null === $salesforce_id ) {
-			$params['FirstName'] = $object['first_name'];
-			$params['LastName']  = $object['last_name'];
+			$params['FirstName']             = $object['first_name'];
+			$params['LastName']              = $object['last_name'];
+			$params['Consolidated_EMail__c'] = $object['user_email'];
 		}
 		return $params;
 
