@@ -3,7 +3,7 @@
 Plugin Name: MinnPost Salesforce
 Plugin URI:
 Description:
-Version: 0.0.7
+Version: 0.0.8
 Author: Jonathan Stegall
 Author URI: https://code.minnpost.com
 License: GPL2+
@@ -30,7 +30,7 @@ class Minnpost_Salesforce {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->version = '0.0.7';
+		$this->version = '0.0.8';
 		$this->admin_init();
 		$this->init();
 		register_activation_hook( __FILE__, array( $this, 'add_user_fields' ) );
@@ -60,6 +60,7 @@ class Minnpost_Salesforce {
 	private function init() {
 		add_filter( 'object_sync_for_salesforce_find_sf_object_match', array( $this, 'find_sf_object_match' ), 10, 4 );
 		add_filter( 'object_sync_for_salesforce_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
+		add_filter( 'object_sync_for_salesforce_pull_query_modify', array( $this, 'pull_query_modify' ), 10, 4 );
 		add_filter( 'object_sync_for_salesforce_settings_tabs', array( $this, 'minnpost_tabs' ), 10, 1 );
 		add_action( 'object_sync_for_salesforce_push_success', array( $this, 'push_member_level' ), 10, 5 );
 		add_filter( 'object_sync_for_salesforce_push_update_params_modify', array( $this, 'set_fields_if_missing' ), 10, 5 );
@@ -133,7 +134,18 @@ class Minnpost_Salesforce {
 		add_settings_section( $page, ucwords( str_replace( '_', ' ', $page ) ), null, $page );
 		// todo: figure out how to pick what objects to prematch against and put that here in the admin settings
 		$minnpost_salesforce_settings = array(
-			'nonmember_level_name' => array(
+			'cms_id_field_in_salesforce' => array(
+				'title'    => __( 'Name of WordPress user id field in Salesforce', 'minnpost-wordpress-salesforce' ),
+				'callback' => $callbacks['text'],
+				'page'     => $page,
+				'section'  => $section,
+				'args'     => array(
+					'type'     => 'text',
+					'desc'     => __( 'Enter the name of the Salesforce field where the WordPress user ID value is stored, if applicable.', 'minnpost-wordpress-salesforce' ),
+					'constant' => '',
+				),
+			),
+			'nonmember_level_name'       => array(
 				'title'    => __( 'Name of Non-Member Level', 'minnpost-wordpress-salesforce' ),
 				'callback' => $callbacks['text'],
 				'page'     => $page,
@@ -144,7 +156,7 @@ class Minnpost_Salesforce {
 					'constant' => '',
 				),
 			),
-			'no_account_message'   => array(
+			'no_account_message'         => array(
 				'title'    => __( 'No Account Message', 'minnpost-wordpress-salesforce' ),
 				'callback' => $callbacks['editor'],
 				'page'     => $page,
@@ -206,6 +218,26 @@ class Minnpost_Salesforce {
 			$push_allowed = false;
 		}
 		return $push_allowed;
+	}
+
+	/**
+	* Filter the SOQL query that is used to pull records
+	*
+	* @param object $soql
+	* @param string $object_type is the Salesforce object type
+	* @param array $salesforce_mapping is the fieldmap that maps the two object types
+	* @param array $mapped_fields is the fields that are being mapped
+	* @return object $soql
+	*/
+	public function pull_query_modify( $soql, $object_type, $salesforce_mapping, $mapped_fields ) {
+		if ( 'Contact' === $object_type ) {
+			$wordpress_user_id_field_in_salesforce = get_option( 'salesforce_api_cms_id_field_in_salesforce', '' );
+			if ( '' === $wordpress_user_id_field_in_salesforce ) {
+				return $soql;
+			}
+			$soql->add_condition( $wordpress_user_id_field_in_salesforce, "''", '!=' );
+		}
+		return $soql;
 	}
 
 	/**
