@@ -3,7 +3,7 @@
 Plugin Name: MinnPost Salesforce
 Plugin URI:
 Description:
-Version: 0.0.8
+Version: 0.0.9
 Author: Jonathan Stegall
 Author URI: https://code.minnpost.com
 License: GPL2+
@@ -90,9 +90,11 @@ class Minnpost_Salesforce {
 		}
 		if ( is_plugin_active( 'object-sync-for-salesforce/object-sync-for-salesforce.php' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . '../object-sync-for-salesforce/object-sync-for-salesforce.php';
-			$salesforce       = Object_Sync_Salesforce::get_instance();
-			$this->salesforce = $salesforce;
-			return $this->salesforce;
+			if ( function_exists( 'object_sync_for_salesforce' ) ) {
+				$salesforce       = object_sync_for_salesforce();
+				$this->salesforce = $salesforce;
+				return $this->salesforce;
+			}
 		}
 	}
 
@@ -427,7 +429,11 @@ class Minnpost_Salesforce {
 			$salesforce = $this->salesforce();
 		}
 
-		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		$mapping = $this->salesforce->mappings->load_all_by_wordpress( 'user', $user_id, true );
+		if ( ! empty( $mapping ) ) {
+			$mapping = $mapping[0];
+		}
+
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -484,7 +490,11 @@ class Minnpost_Salesforce {
 			$salesforce = $this->salesforce();
 		}
 
-		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		$mapping = $this->salesforce->mappings->load_all_by_wordpress( 'user', $user_id, true );
+		if ( ! empty( $mapping ) ) {
+			$mapping = $mapping[0];
+		}
+
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -546,7 +556,11 @@ class Minnpost_Salesforce {
 			$salesforce = $this->salesforce();
 		}
 
-		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		$mapping = $this->salesforce->mappings->load_all_by_wordpress( 'user', $user_id, true );
+		if ( ! empty( $mapping ) ) {
+			$mapping = $mapping[0];
+		}
+
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -555,7 +569,7 @@ class Minnpost_Salesforce {
 				$query .= " AND $opp_payment_type_field = '$opp_payment_type_value'";
 			}
 			if ( '' !== $history_days_for_failed ) {
-				$thirty_days_ago = date( 'Y-m-d', strtotime( '-30 days' ) );
+				$thirty_days_ago = gmdate( 'Y-m-d', strtotime( '-30 days' ) );
 				$today           = current_time( 'Y-m-d' );
 				$query          .= " AND ( CloseDate <= $today AND CloseDate >= $thirty_days_ago )";
 			}
@@ -614,7 +628,11 @@ class Minnpost_Salesforce {
 			$salesforce = $this->salesforce();
 		}
 
-		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		$mapping = $this->salesforce->mappings->load_all_by_wordpress( 'user', $user_id, true );
+		if ( ! empty( $mapping ) ) {
+			$mapping = $mapping[0];
+		}
+
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
@@ -660,7 +678,11 @@ class Minnpost_Salesforce {
 			$salesforce = $this->salesforce();
 		}
 
-		$mapping = $this->salesforce->mappings->load_by_wordpress( 'user', $user_id, true );
+		$mapping = $this->salesforce->mappings->load_all_by_wordpress( 'user', $user_id, true );
+		if ( ! empty( $mapping ) ) {
+			$mapping = $mapping[0];
+		}
+
 		if ( ! empty( $mapping ) ) {
 			$salesforce_id  = $mapping['salesforce_id'];
 			$salesforce_api = $salesforce->salesforce['sfapi'];
