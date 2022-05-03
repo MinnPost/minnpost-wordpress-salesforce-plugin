@@ -261,7 +261,7 @@ class Minnpost_Salesforce {
 	* todo: may need a way for this to prevent a deletion in Salesforce if multiple contacts match the email address, for example. the plugin itself will block it if there are existing map rows. we might need to expand it for this, or maybe it is sufficient as it is. mp would probably turn off the delete hooks anyway.
 	*
 	*/
-	public function find_sf_object_match( $salesforce_id, $wordpress_object, $mapping = array(), $action ) {
+	public function find_sf_object_match( $salesforce_id, $wordpress_object, $mapping, $action ) {
 
 		if ( 'push' === $action && 'user' === $mapping['wordpress_object'] ) {
 			if ( is_object( $this->salesforce ) ) {
