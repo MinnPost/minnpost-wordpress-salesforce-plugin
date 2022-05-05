@@ -3,7 +3,7 @@
 Plugin Name: MinnPost Salesforce
 Plugin URI:
 Description:
-Version: 0.0.9
+Version: 0.0.10
 Author: Jonathan Stegall
 Author URI: https://code.minnpost.com
 License: GPL2+
@@ -30,7 +30,7 @@ class Minnpost_Salesforce {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->version = '0.0.8';
+		$this->version = '0.0.10';
 		$this->admin_init();
 		$this->init();
 		register_activation_hook( __FILE__, array( $this, 'add_user_fields' ) );
