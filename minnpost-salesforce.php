@@ -15,13 +15,13 @@ Text Domain: minnpost-salesforce
 class Minnpost_Salesforce {
 
 	/**
-	* @var string
-	*/
+	 * @var string
+	 */
 	private $version;
 
 	/**
-	* @var object
-	*/
+	 * @var object
+	 */
 	public $salesforce;
 
 	/**
@@ -39,10 +39,10 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* admin start
-	*
-	* @throws \Exception
-	*/
+	 * admin start
+	 *
+	 * @throws \Exception
+	 */
 	private function admin_init() {
 		add_action( 'admin_init', array( $this, 'salesforce' ) );
 		add_action( 'admin_init', array( $this, 'minnpost_salesforce_settings_forms' ) );
@@ -53,10 +53,10 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* start
-	*
-	* @throws \Exception
-	*/
+	 * start
+	 *
+	 * @throws \Exception
+	 */
 	private function init() {
 		add_filter( 'object_sync_for_salesforce_find_sf_object_match', array( $this, 'find_sf_object_match' ), 10, 4 );
 		add_filter( 'object_sync_for_salesforce_push_object_allowed', array( $this, 'push_not_allowed' ), 10, 5 );
@@ -77,16 +77,15 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Load the Salesforce object
-	* Also make it available to this whole class
-	*
-	* @return $this->salesforce
-	*
-	*/
+	 * Load the Salesforce object
+	 * Also make it available to this whole class
+	 *
+	 * @return $this->salesforce
+	 */
 	public function salesforce() {
 		// get the base class
 		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once( ABSPATH . '/wp-admin/includes/plugin.php' );
+			require_once ABSPATH . '/wp-admin/includes/plugin.php';
 		}
 		if ( is_plugin_active( 'object-sync-for-salesforce/object-sync-for-salesforce.php' ) ) {
 			require_once plugin_dir_path( __FILE__ ) . '../object-sync-for-salesforce/object-sync-for-salesforce.php';
@@ -99,10 +98,9 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Create default WordPress admin settings form for MinnPost-specific salesforce things
-	* This is for the Settings page/tab
-	*
-	*/
+	 * Create default WordPress admin settings form for MinnPost-specific salesforce things
+	 * This is for the Settings page/tab
+	 */
 	public function minnpost_salesforce_settings_forms() {
 		$get_data = filter_input_array( INPUT_GET, FILTER_SANITIZE_STRING );
 		$page     = isset( $get_data['tab'] ) ? sanitize_key( $get_data['tab'] ) : 'settings';
@@ -125,13 +123,13 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Fields for the Log Settings tab
-	* This runs add_settings_section once, as well as add_settings_field and register_setting methods for each option
-	*
-	* @param string $page
-	* @param string $section
-	* @param array $callbacks
-	*/
+	 * Fields for the Log Settings tab
+	 * This runs add_settings_section once, as well as add_settings_field and register_setting methods for each option
+	 *
+	 * @param string $page
+	 * @param string $section
+	 * @param array  $callbacks
+	 */
 	private function fields_minnpost_settings( $page, $section, $callbacks ) {
 		add_settings_section( $page, ucwords( str_replace( '_', ' ', $page ) ), null, $page );
 		// todo: figure out how to pick what objects to prematch against and put that here in the admin settings
@@ -195,26 +193,26 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Add an admin tab to the Salesforce plugin's settings
-	*
-	* @param array $tabs
-	* @return array $tabs
-	*/
+	 * Add an admin tab to the Salesforce plugin's settings
+	 *
+	 * @param array $tabs
+	 * @return array $tabs
+	 */
 	public function minnpost_tabs( $tabs ) {
 		$tabs['minnpost'] = 'MinnPost';
 		return $tabs;
 	}
 
 	/**
-	* Do not add user with ID of 1 to Salesforce
-	*
-	* @param bool $push_allowed
-	* @param string $object_type
-	* @param array $object
-	* @param int $sf_sync_trigger
-	* @param array $mapping
-	* @return bool $push_allowed
-	*/
+	 * Do not add user with ID of 1 to Salesforce
+	 *
+	 * @param bool   $push_allowed
+	 * @param string $object_type
+	 * @param array  $object
+	 * @param int    $sf_sync_trigger
+	 * @param array  $mapping
+	 * @return bool $push_allowed
+	 */
 	public function push_not_allowed( $push_allowed, $object_type, $object, $sf_sync_trigger, $mapping ) {
 		if ( 'user' === $object_type && 1 === $object['ID'] ) { // do not add user 1 to salesforce
 			$push_allowed = false;
@@ -223,14 +221,14 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Filter the SOQL query that is used to pull records
-	*
-	* @param object $soql
-	* @param string $object_type is the Salesforce object type
-	* @param array $salesforce_mapping is the fieldmap that maps the two object types
-	* @param array $mapped_fields is the fields that are being mapped
-	* @return object $soql
-	*/
+	 * Filter the SOQL query that is used to pull records
+	 *
+	 * @param object $soql
+	 * @param string $object_type is the Salesforce object type
+	 * @param array  $salesforce_mapping is the fieldmap that maps the two object types
+	 * @param array  $mapped_fields is the fields that are being mapped
+	 * @return object $soql
+	 */
 	public function pull_query_modify( $soql, $object_type, $salesforce_mapping, $mapped_fields ) {
 		if ( 'Contact' === $object_type ) {
 			$wordpress_user_id_field_in_salesforce = get_option( 'salesforce_api_cms_id_field_in_salesforce', '' );
@@ -243,24 +241,23 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Find an object match between a WordPress object and a Salesforce object
-	* This is designed to find out if there is already a map based on the available WordPress data
-	*
-	* @param string $salesforce_id
-	*   Unique identifier for the Salesforce object
-	* @param array $wordpress_object
-	*   Array of the WordPress object's data
-	* @param array $mapping
-	*   Array of the fieldmap between the WordPress and Salesforce object types
-	* @param string $action
-	*   Is this a push or pull action?
-	*
-	* @return array $salesforce_id
-	*   Unique identifier for the Salesforce object
-	*
-	* todo: may need a way for this to prevent a deletion in Salesforce if multiple contacts match the email address, for example. the plugin itself will block it if there are existing map rows. we might need to expand it for this, or maybe it is sufficient as it is. mp would probably turn off the delete hooks anyway.
-	*
-	*/
+	 * Find an object match between a WordPress object and a Salesforce object
+	 * This is designed to find out if there is already a map based on the available WordPress data
+	 *
+	 * @param string $salesforce_id
+	 *   Unique identifier for the Salesforce object
+	 * @param array  $wordpress_object
+	 *   Array of the WordPress object's data
+	 * @param array  $mapping
+	 *   Array of the fieldmap between the WordPress and Salesforce object types
+	 * @param string $action
+	 *   Is this a push or pull action?
+	 *
+	 * @return array $salesforce_id
+	 *   Unique identifier for the Salesforce object
+	 *
+	 * todo: may need a way for this to prevent a deletion in Salesforce if multiple contacts match the email address, for example. the plugin itself will block it if there are existing map rows. we might need to expand it for this, or maybe it is sufficient as it is. mp would probably turn off the delete hooks anyway.
+	 */
 	public function find_sf_object_match( $salesforce_id, $wordpress_object, $mapping, $action ) {
 
 		if ( 'push' === $action && 'user' === $mapping['wordpress_object'] ) {
@@ -290,23 +287,22 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Apply the member level to the user's roles
-	* This runs after the user has been pushed to Salesforce and has a response from Salesforce, which may have a member level
-	* If the current object is a user with an ID, and it comes from Salesforce with a member level, do stuff with it
-	* Currently it just deals with the roles associated with the user
-	*
-	* @param string $op
-	*   What kind of operation we were doing (create, update, delete)
-	* @param array $sf_response
-	*   The full response from Salesforce
-	* @param array $synced_object
-	*   The WordPress object, object map, and field map together
-	* @param string $object_id
-	*   The Salesforce ID
-	* @param string $wordpress_id_field_name
-	*   How to identify the ID field for the WordPress object
-	*
-	*/
+	 * Apply the member level to the user's roles
+	 * This runs after the user has been pushed to Salesforce and has a response from Salesforce, which may have a member level
+	 * If the current object is a user with an ID, and it comes from Salesforce with a member level, do stuff with it
+	 * Currently it just deals with the roles associated with the user
+	 *
+	 * @param string $op
+	 *   What kind of operation we were doing (create, update, delete)
+	 * @param array  $sf_response
+	 *   The full response from Salesforce
+	 * @param array  $synced_object
+	 *   The WordPress object, object map, and field map together
+	 * @param string $object_id
+	 *   The Salesforce ID
+	 * @param string $wordpress_id_field_name
+	 *   How to identify the ID field for the WordPress object
+	 */
 	public function push_member_level( $op, $sf_response, $synced_object, $object_id, $wordpress_id_field_name ) {
 		// we run it on the push_success hook because that gives us the salesforce data we need
 		if ( isset( $synced_object['wordpress_object'][ $wordpress_id_field_name ] ) && isset( $sf_response['data']['Membership_Level__c'] ) ) {
@@ -318,20 +314,20 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Set contact fields if this is a new Contact being added to Salesforce
-	* This runs before the user has been pushed to Salesforce, but we have data for it, which may have a Salesforce ID
-	* @param array $params
-	*   Params mapping the fields to their values
-	* @param string $salesforce_id
-	*   Salesforce ID if there is a matched object
-	* @param array $mapping
-	*   Mapping object.
-	* @param array $object
-	*   WordPress object data.
-	* @param string $object_type
-	*   WordPress object type
-	*
-	*/
+	 * Set contact fields if this is a new Contact being added to Salesforce
+	 * This runs before the user has been pushed to Salesforce, but we have data for it, which may have a Salesforce ID
+	 *
+	 * @param array  $params
+	 *   Params mapping the fields to their values
+	 * @param string $salesforce_id
+	 *   Salesforce ID if there is a matched object
+	 * @param array  $mapping
+	 *   Mapping object.
+	 * @param array  $object
+	 *   WordPress object data.
+	 * @param string $object_type
+	 *   WordPress object type
+	 */
 	public function set_fields_if_missing( $params, $salesforce_id, $mapping, $object, $object_type = '' ) {
 		// this should only run if we're mapping a user that does not have a Salesforce id.
 		if ( 'user' === $object_type && null === $salesforce_id ) {
@@ -344,23 +340,22 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Apply the member level to the user's roles
-	* This runs before the user has been pulled from Salesforce, but we have Salesforce data for it, which may have a member level
-	* If the current object is a user with an ID, and it comes from Salesforce with a member level, do stuff with it
-	* Currently it just deals with the roles associated with the user
-	*
-	* @param int $wordpress_id
-	*   ID for the WordPress object
-	* @param array $mapping
-	*   The fieldmap between the WordPress and Salesforce objects
-	* @param array $object
-	*   The Salesforce object
-	* @param string $wordpress_id_field_name
-	*   How to identify the ID field for the WordPress object
-	* @param array $params
-	*   The params array that matches fields to each other for saving
-	*
-	*/
+	 * Apply the member level to the user's roles
+	 * This runs before the user has been pulled from Salesforce, but we have Salesforce data for it, which may have a member level
+	 * If the current object is a user with an ID, and it comes from Salesforce with a member level, do stuff with it
+	 * Currently it just deals with the roles associated with the user
+	 *
+	 * @param int    $wordpress_id
+	 *   ID for the WordPress object
+	 * @param array  $mapping
+	 *   The fieldmap between the WordPress and Salesforce objects
+	 * @param array  $object
+	 *   The Salesforce object
+	 * @param string $wordpress_id_field_name
+	 *   How to identify the ID field for the WordPress object
+	 * @param array  $params
+	 *   The params array that matches fields to each other for saving
+	 */
 	public function pull_member_level( $wordpress_id, $mapping, $object, $wordpress_id_field_name, $params ) {
 
 		// as per this question, if the only thing that changes is the member level formula that we reference, the updated api call does not get triggered
@@ -374,14 +369,13 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* If a user fails to log in, check to see if they exist in Salesforce
-	*
-	* @param string $message
-	* @param string $error_code
-	* @param array $data
-	* @return string $message
-	*
-	*/
+	 * If a user fails to log in, check to see if they exist in Salesforce
+	 *
+	 * @param string $message
+	 * @param string $error_code
+	 * @param array  $data
+	 * @return string $message
+	 */
 	public function login_fail_check( $message, $error_code, $data ) {
 		if ( 'invalid_username' === $error_code || 'invalid_email' === $error_code || 'invalidcombo' === $error_code ) {
 			if ( is_object( $this->salesforce ) ) {
@@ -409,16 +403,15 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Get the user's active recurring donations
-	*
-	* @param int $user_id
-	* @param string $active_field_name
-	* @param string $active_field_value
-	* @param string $payment_type_field_name
-	* @param string $payment_type_field_value
-	* @return array $donations
-	*
-	*/
+	 * Get the user's active recurring donations
+	 *
+	 * @param int    $user_id
+	 * @param string $active_field_name
+	 * @param string $active_field_value
+	 * @param string $payment_type_field_name
+	 * @param string $payment_type_field_value
+	 * @return array $donations
+	 */
 	public function get_active_recurring_donations( $user_id, $active_field_name, $active_field_value, $payment_type_field_name, $payment_type_field_value ) {
 
 		$donations = array();
@@ -468,18 +461,17 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Get the user's pledged opportunities
-	*
-	* @param int $user_id
-	* @param string $recurrence_field
-	* @param string $recurrence_value
-	* @param string $contact_id_field
-	* @param string $payment_type_field_name
-	* @param string $payment_type_field_value
-	* @param string $opportunity_type_value
-	* @return array $donations
-	*
-	*/
+	 * Get the user's pledged opportunities
+	 *
+	 * @param int    $user_id
+	 * @param string $recurrence_field
+	 * @param string $recurrence_value
+	 * @param string $contact_id_field
+	 * @param string $payment_type_field_name
+	 * @param string $payment_type_field_value
+	 * @param string $opportunity_type_value
+	 * @return array $donations
+	 */
 	public function get_pledged_opportunities( $user_id, $recurrence_field, $recurrence_value, $contact_id_field, $payment_type_field_name, $payment_type_field_value, $opportunity_type_value = '' ) {
 
 		$donations = array();
@@ -531,21 +523,20 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Get the user's failed opportunities based on the passed criteria
-	*
-	* @param int $user_id
-	* @param string $history_opp_contact_field
-	* @param string $opp_payment_type_field
-	* @param string $opp_payment_type_value
-	* @param string $history_failed_value
-	* @param string|int $history_days_for_failed
-	* @param string $recurrence_field_name
-	* @param string $recurrence_field_value
-	* @param string $failed_recurring_id_field
-	* @param string $opportunity_type_value
-	* @return array $donations
-	*
-	*/
+	 * Get the user's failed opportunities based on the passed criteria
+	 *
+	 * @param int        $user_id
+	 * @param string     $history_opp_contact_field
+	 * @param string     $opp_payment_type_field
+	 * @param string     $opp_payment_type_value
+	 * @param string     $history_failed_value
+	 * @param string|int $history_days_for_failed
+	 * @param string     $recurrence_field_name
+	 * @param string     $recurrence_field_value
+	 * @param string     $failed_recurring_id_field
+	 * @param string     $opportunity_type_value
+	 * @return array $donations
+	 */
 	public function get_failed_opportunities( $user_id, $history_opp_contact_field, $opp_payment_type_field, $opp_payment_type_value, $history_failed_value, $history_days_for_failed, $recurrence_field_name, $recurrence_field_value, $failed_recurring_id_field, $opportunity_type_value = '' ) {
 
 		$donations = array();
@@ -609,15 +600,14 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Get the user's successful opportunities based on the passed criteria
-	*
-	* @param int $user_id
-	* @param string $history_opp_contact_field
-	* @param string $history_success_value
-	* @param string $opportunity_type_value
-	* @return array $donations
-	*
-	*/
+	 * Get the user's successful opportunities based on the passed criteria
+	 *
+	 * @param int    $user_id
+	 * @param string $history_opp_contact_field
+	 * @param string $history_success_value
+	 * @param string $opportunity_type_value
+	 * @return array $donations
+	 */
 	public function get_successful_opportunities( $user_id, $history_opp_contact_field, $history_success_value, $opportunity_type_value = '' ) {
 
 		$donations = array();
@@ -663,12 +653,11 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Get the user's member level without cache
-	*
-	* @param int $user_id
-	* @return string $member_level
-	*
-	*/
+	 * Get the user's member level without cache
+	 *
+	 * @param int $user_id
+	 * @return string $member_level
+	 */
 	public function get_member_level( $user_id ) {
 		$member_level = '';
 
@@ -703,17 +692,16 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Do the actual setting of the member level.
-	* This works the same for push and pull, it just requires the correct data
-	*
-	* @param string $wordpress_id_field_name
-	*   How to identify the ID field for the WordPress object
-	* @param int $wordpress_id
-	*   ID for the WordPress object
-	* @param string $salesforce_member_level
-	*   The member level value from Salesforce
-	*
-	*/
+	 * Do the actual setting of the member level.
+	 * This works the same for push and pull, it just requires the correct data
+	 *
+	 * @param string $wordpress_id_field_name
+	 *   How to identify the ID field for the WordPress object
+	 * @param int    $wordpress_id
+	 *   ID for the WordPress object
+	 * @param string $salesforce_member_level
+	 *   The member level value from Salesforce
+	 */
 	private function set_member_level( $wordpress_id_field_name, $wordpress_id, $salesforce_member_level ) {
 		$user = get_user_by( $wordpress_id_field_name, $wordpress_id );
 		if ( false !== $user ) {
@@ -779,10 +767,9 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Add roles and capabilities
-	* This adds the member roles
-	*
-	*/
+	 * Add roles and capabilities
+	 * This adds the member roles
+	 */
 	public function add_roles_capabilities() {
 		$bronze   = add_role( 'member_bronze', 'Member - Bronze', array() );
 		$silver   = add_role( 'member_silver', 'Member - Silver', array() );
@@ -791,10 +778,9 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Remove roles and capabilities
-	* This removes the member roles
-	*
-	*/
+	 * Remove roles and capabilities
+	 * This removes the member roles
+	 */
 	public function remove_roles_capabilities() {
 		remove_role( 'member_bronze' );
 		remove_role( 'member_silver' );
@@ -803,10 +789,10 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Default display for <input> fields
-	*
-	* @param array $args
-	*/
+	 * Default display for <input> fields
+	 *
+	 * @param array $args
+	 */
 	public function display_input_field( $args ) {
 		$type    = $args['type'];
 		$id      = $args['label_for'];
@@ -856,11 +842,11 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Display for multiple checkboxes
-	* Above method can handle a single checkbox as it is
-	*
-	* @param array $args
-	*/
+	 * Display for multiple checkboxes
+	 * Above method can handle a single checkbox as it is
+	 *
+	 * @param array $args
+	 */
 	public function display_checkboxes( $args ) {
 		$type    = 'checkbox';
 		$name    = $args['name'];
@@ -896,10 +882,10 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Display for a dropdown/select
-	*
-	* @param array $args
-	*/
+	 * Display for a dropdown/select
+	 *
+	 * @param array $args
+	 */
 	public function display_textarea( $args ) {
 		$id    = $args['label_for'];
 		$name  = $args['name'];
@@ -949,10 +935,10 @@ class Minnpost_Salesforce {
 	}
 
 	/**
-	* Display for a wysiwyg editir
-	*
-	* @param array $args
-	*/
+	 * Display for a wysiwyg editir
+	 *
+	 * @param array $args
+	 */
 	public function display_editor( $args ) {
 		$id      = $args['label_for'];
 		$name    = $args['name'];
